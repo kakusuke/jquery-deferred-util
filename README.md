@@ -15,7 +15,9 @@ In your web page:
 <script src="dist/deferred-util.min.js"></script>
 <script>
 jQuery(function($) {
-  $.awesome(); // "awesome"
+  // like setTimeout
+  $.wait(100).done(function() {
+  });
 });
 </script>
 ```
