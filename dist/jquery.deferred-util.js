@@ -1,11 +1,6 @@
-/*
- * deferred-util
- * https://github.com/kakusuke/jquery-deferred-util
- *
- * Copyright (c) 2014 kakusuke
- * Licensed under the MIT license.
- */
-
+/*! Deferred Util - v0.1.0 - 2014-06-03
+* https://github.com/kakusuke/jquery-deferred-util
+* Copyright (c) 2014 kakusuke; Licensed MIT */
 (function($) {
 
   $.wait = function(duration) {

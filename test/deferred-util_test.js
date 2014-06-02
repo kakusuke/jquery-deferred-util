@@ -20,43 +20,51 @@
       throws(block, [expected], [message])
   */
 
-  module('jQuery#deferred_util', {
-    // This will run before each test in this module.
+  module('jQuery#wait', {
     setup: function() {
-      this.elems = $('#qunit-fixture').children();
+      this._old = window.setTimeout;
+      window.setTimeout = (function() {
+        var id = 0;
+        var list = [];
+        function setTimeout(fn, duration) {
+          list.push([fn, duration]);
+          return id++;
+        }
+        setTimeout.digest = function(duration) {
+          var done = [];
+          list = list.filter(function(item) {
+            item[1] -= duration;
+            return item[1] > 0 || done.push(item) || false; 
+          });
+          done.forEach(function(item) {
+            item[0].call(null);
+          });
+        };
+        return setTimeout;
+      }());
+
+      this.called = false;
+      this.wait = $.wait(100).done($.proxy(function() {
+        this.called = true;
+      }, this));
+    },
+    teardown: function() {
+      window.setTimeout = this._old;
     }
   });
 
-  test('is chainable', function() {
-    expect(1);
-    // Not a bad test to run on collection methods.
-    strictEqual(this.elems.deferred_util(), this.elems, 'should be chainable');
-  });
-
-  test('is awesome', function() {
-    expect(1);
-    strictEqual(this.elems.deferred_util().text(), 'awesome0awesome1awesome2', 'should be awesome');
-  });
-
-  module('jQuery.deferred_util');
-
-  test('is awesome', function() {
+  test('does not fire the callback until the time has passed', function() {
     expect(2);
-    strictEqual($.deferred_util(), 'awesome.', 'should be awesome');
-    strictEqual($.deferred_util({punctuation: '!'}), 'awesome!', 'should be thoroughly awesome');
+    setTimeout.digest(50);
+    equal(this.called, false);
+    setTimeout.digest(50);
+    equal(this.called, true);
   });
 
-  module(':deferred_util selector', {
-    // This will run before each test in this module.
-    setup: function() {
-      this.elems = $('#qunit-fixture').children();
-    }
-  });
-
-  test('is awesome', function() {
+  test('is cancelable', function() {
     expect(1);
-    // Use deepEqual & .get() when comparing jQuery objects.
-    deepEqual(this.elems.filter(':deferred_util').get(), this.elems.last().get(), 'knows awesome when it sees it');
+    this.wait.reject();
+    setTimeout.digest(100);
+    equal(this.called, false);
   });
-
 }(jQuery));
