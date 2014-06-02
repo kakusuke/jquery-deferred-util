@@ -1,0 +1,26 @@
+{
+  "name": "deferred-util",
+  "title": "Deferred Util",
+  "description": "Deferred Utility",
+  "version": "0.1.0",
+  "homepage": "https://github.com/kakusuke/jquery-deferred-util",
+  "author": {
+    "name": "kakusuke",
+    "email": "bananafishmonger+github@gmail.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kakusuke/jquery-deferred-util.git"
+  },
+  "bugs": "https://github.com/kakusuke/jquery-deferred-util/issues",
+  "licenses": [
+    {
+      "type": "MIT",
+      "url": "https://github.com/kakusuke/jquery-deferred-util/blob/master/LICENSE-MIT"
+    }
+  ],
+  "dependencies": {
+    "jquery": "1.5"
+  },
+  "keywords": []
+}
