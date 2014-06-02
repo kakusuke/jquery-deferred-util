@@ -1,8 +1,8 @@
 {
   "name": "deferred-util",
   "title": "Deferred Util",
-  "description": "Deferred Utility",
-  "version": "0.1.0",
+  "description": "Deferred Utility plugin",
+  "version": "0.1.1",
   "homepage": "https://github.com/kakusuke/jquery-deferred-util",
   "author": {
     "name": "kakusuke",
@@ -20,7 +20,7 @@
     }
   ],
   "dependencies": {
-    "jquery": "1.5"
+    "jquery": ">=1.5"
   },
-  "keywords": []
+  "keywords": ["Deferred", "util"]
 }
