@@ -14,4 +14,28 @@
     return dfd;
   };
 
+  var Queue = (function() {
+    function Queue() {
+      if (!(this instanceof Queue)) {
+        return new Queue();
+      }
+      this._queue = [];
+    }
+
+    $.extend(Queue.prototype, {
+      add: function(cb) {
+        var that = this;
+        var dfd = $.Deferred();
+        $.when.apply($, this._queue).done(function() {
+          (cb.call(this) || $.Deferred().resolve()).always(dfd.resolve);
+        });
+        this._queue.push(dfd);
+      }
+    });
+
+    return Queue;
+  }());
+
+  $.Queue = Queue;
+
 }(jQuery));

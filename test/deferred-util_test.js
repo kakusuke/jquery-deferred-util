@@ -20,33 +20,46 @@
       throws(block, [expected], [message])
   */
 
+  function mockTimeout() {
+    var old = window.setTimeout;
+    window.setTimeout = (function() {
+      var id = 0;
+      var list = [];
+      function setTimeout(fn, duration) {
+        list.push([fn, duration]);
+        return id++;
+      }
+      setTimeout.digest = function(duration) {
+        var done = [];
+        list = list.filter(function(item) {
+          item[1] -= duration;
+          return item[1] > 0 || done.push(item) || false; 
+        });
+        done.forEach(function(item) {
+          item[0].call(null);
+        });
+      };
+      return setTimeout;
+    }());
+
+    return old;
+  }
+
+  function spy() {
+    function _() {
+      _.called = true;
+      _.arguments = arguments;
+    }
+    _.called = false;
+    return _;
+  }
+
   module('jQuery#wait', {
     setup: function() {
-      this._old = window.setTimeout;
-      window.setTimeout = (function() {
-        var id = 0;
-        var list = [];
-        function setTimeout(fn, duration) {
-          list.push([fn, duration]);
-          return id++;
-        }
-        setTimeout.digest = function(duration) {
-          var done = [];
-          list = list.filter(function(item) {
-            item[1] -= duration;
-            return item[1] > 0 || done.push(item) || false; 
-          });
-          done.forEach(function(item) {
-            item[0].call(null);
-          });
-        };
-        return setTimeout;
-      }());
+      this._old = mockTimeout();
 
-      this.called = false;
-      this.wait = $.wait(100).done($.proxy(function() {
-        this.called = true;
-      }, this));
+      this.spy = spy();
+      this.wait = $.wait(100).done(this.spy);
     },
     teardown: function() {
       window.setTimeout = this._old;
@@ -54,17 +67,52 @@
   });
 
   test('does not fire the callback until the time has passed', function() {
-    expect(2);
     setTimeout.digest(50);
-    equal(this.called, false);
+    equal(this.spy.called, false);
     setTimeout.digest(50);
-    equal(this.called, true);
+    equal(this.spy.called, true);
   });
 
   test('is cancelable', function() {
-    expect(1);
     this.wait.reject();
     setTimeout.digest(100);
-    equal(this.called, false);
+    equal(this.spy.called, false);
+  });
+
+  module('jQuery#Queue', {
+    setup: function() {
+      this._old = mockTimeout();
+      this.queue = $.Queue();
+    },
+    teardown: function() {
+      window.setTimeout = this._old;
+    }
+  });
+
+  test('calls added callbacks seqentially', function() {
+    var timer1, timer2, timer3;
+
+    this.queue.add(function() { return timer1 = $.wait(1000); });
+    this.queue.add(function() { return timer2 = $.wait(500); });
+    this.queue.add(function() { return timer3 = $.wait(1500); });
+
+    equal(timer1.state(), 'pending');
+    equal(timer2, null);
+    equal(timer3, null);
+
+    setTimeout.digest(1000);
+    equal(timer1.state(), 'resolved');
+    equal(timer2.state(), 'pending');
+    equal(timer3, null);
+
+    setTimeout.digest(500);
+    equal(timer1.state(), 'resolved');
+    equal(timer2.state(), 'resolved');
+    equal(timer3.state(), 'pending');
+
+    setTimeout.digest(1500);
+    equal(timer1.state(), 'resolved');
+    equal(timer2.state(), 'resolved');
+    equal(timer3.state(), 'resolved');
   });
 }(jQuery));
