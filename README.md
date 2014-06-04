@@ -15,9 +15,28 @@ In your web page:
 <script src="dist/deferred-util.min.js"></script>
 <script>
 jQuery(function($) {
-  // like setTimeout
+  // Like setTimeout,
   $.wait(100).done(function() {
+    // this callback called after 100ms.
   });
+
+  var queue = $.Queue();
+  // You can add the callback to the queue, and callbacks are called by added order.
+  queue.add(function() {
+    // first.
+    // When queue is empty, callback called immediatelly.
+    // The return value delays next callback call
+    return $.get('/foo.json').done(function() { /* process.. */ });
+  });
+  queue.add(function() {
+    // second.
+    return $.get('/bar.json').done(function() { /* process.. */ });
+  });
+  queue.add(function() {
+    // third.
+    return $.get('/buz.json').done(function() { /* process.. */ });
+  });
+
 });
 </script>
 ```
