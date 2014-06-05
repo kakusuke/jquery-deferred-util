@@ -8,7 +8,7 @@
 
 (function($) {
 
-  $.wait = function(duration) {
+  var wait = function(duration) {
     var dfd = $.Deferred();
     setTimeout(dfd.resolve, duration);
     return dfd;
@@ -24,7 +24,6 @@
 
     $.extend(Queue.prototype, {
       add: function(cb) {
-        var that = this;
         var dfd = $.Deferred();
         $.when.apply($, this._queue).done(function() {
           (cb.call(this) || $.Deferred().resolve()).always(dfd.resolve);
@@ -36,6 +35,9 @@
     return Queue;
   }());
 
-  $.Queue = Queue;
+  $.extend({
+    wait: wait,
+    Queue: Queue
+  });
 
 }(jQuery));
