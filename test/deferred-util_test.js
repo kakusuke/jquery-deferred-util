@@ -54,16 +54,24 @@
     return _;
   }
 
-  module('jQuery#wait', {
+  var initDefault = {
     setup: function() {
       this._old = mockTimeout();
-
-      this.spy = spy();
-      this.wait = $.wait(100).done(this.spy);
+      this.queue = $.Queue();
     },
     teardown: function() {
       window.setTimeout = this._old;
     }
+  };
+
+  module('jQuery#wait', {
+    setup: function() {
+      initDefault.setup.call(this);
+
+      this.spy = spy();
+      this.wait = $.wait(100).done(this.spy);
+    },
+    teardown: initDefault.teardown
   });
 
   test('does not fire the callback until the time has passed', function() {
@@ -79,15 +87,8 @@
     equal(this.spy.called, false);
   });
 
-  module('jQuery#Queue', {
-    setup: function() {
-      this._old = mockTimeout();
-      this.queue = $.Queue();
-    },
-    teardown: function() {
-      window.setTimeout = this._old;
-    }
-  });
+
+  module('jQuery#Queue', initDefault);
 
   test('calls added callbacks seqentially', function() {
     var timer1, timer2, timer3;
@@ -115,4 +116,5 @@
     equal(timer2.state(), 'resolved');
     equal(timer3.state(), 'resolved');
   });
+
 }(jQuery));
