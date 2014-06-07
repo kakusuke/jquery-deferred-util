@@ -57,7 +57,7 @@
   var initDefault = {
     setup: function() {
       this._old = mockTimeout();
-      this.queue = $.Queue();
+      this.sequence = $.Sequence();
     },
     teardown: function() {
       window.setTimeout = this._old;
@@ -88,33 +88,67 @@
   });
 
 
-  module('jQuery#Queue', initDefault);
+  module('jQuery#Sequence', initDefault);
 
   test('calls added callbacks seqentially', function() {
     var timer1, timer2, timer3;
 
-    this.queue.add(function() { return timer1 = $.wait(1000); });
-    this.queue.add(function() { return timer2 = $.wait(500); });
-    this.queue.add(function() { return timer3 = $.wait(1500); });
+    this.sequence.add(function() { return timer1 = $.wait(1000); });
+    this.sequence.add(function() { return timer2 = $.wait(500); });
+    this.sequence.add(function() { return timer3 = $.wait(1500); });
 
+    equal(timer1, null);
+    equal(timer2, null);
+    equal(timer3, null);
+    equal(this.sequence.promise().state(), 'pending');
+
+    this.sequence.start();
     equal(timer1.state(), 'pending');
     equal(timer2, null);
     equal(timer3, null);
+    equal(this.sequence.promise().state(), 'pending');
 
     setTimeout.digest(1000);
     equal(timer1.state(), 'resolved');
     equal(timer2.state(), 'pending');
     equal(timer3, null);
+    equal(this.sequence.promise().state(), 'pending');
 
     setTimeout.digest(500);
     equal(timer1.state(), 'resolved');
     equal(timer2.state(), 'resolved');
     equal(timer3.state(), 'pending');
+    equal(this.sequence.promise().state(), 'pending');
 
     setTimeout.digest(1500);
     equal(timer1.state(), 'resolved');
     equal(timer2.state(), 'resolved');
     equal(timer3.state(), 'resolved');
+    equal(this.sequence.promise().state(), 'resolved');
+
+    this.sequence.start();
+    equal(timer1.state(), 'pending');
+    equal(timer2.state(), 'resolved');
+    equal(timer3.state(), 'resolved');
+    equal(this.sequence.promise().state(), 'pending');
+
+    setTimeout.digest(1000);
+    equal(timer1.state(), 'resolved');
+    equal(timer2.state(), 'pending');
+    equal(timer3.state(), 'resolved');
+    equal(this.sequence.promise().state(), 'pending');
+
+    setTimeout.digest(500);
+    equal(timer1.state(), 'resolved');
+    equal(timer2.state(), 'resolved');
+    equal(timer3.state(), 'pending');
+    equal(this.sequence.promise().state(), 'pending');
+
+    setTimeout.digest(1500);
+    equal(timer1.state(), 'resolved');
+    equal(timer2.state(), 'resolved');
+    equal(timer3.state(), 'resolved');
+    equal(this.sequence.promise().state(), 'resolved');
   });
 
 }(jQuery));
