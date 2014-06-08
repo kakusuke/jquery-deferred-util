@@ -39,7 +39,7 @@
         add: function(job) {
           jobs.push(job);
         },
-        start: function() {
+        play: function() {
           dfd = $.Deferred();
 
           for (var i = 0, len = jobs.length; i < len; i++) {

@@ -102,7 +102,7 @@
     equal(timer3, null);
     equal(this.sequence.promise().state(), 'pending');
 
-    this.sequence.start();
+    this.sequence.play();
     equal(timer1.state(), 'pending');
     equal(timer2, null);
     equal(timer3, null);
@@ -126,7 +126,7 @@
     equal(timer3.state(), 'resolved');
     equal(this.sequence.promise().state(), 'resolved');
 
-    this.sequence.start();
+    this.sequence.play();
     equal(timer1.state(), 'pending');
     equal(timer2.state(), 'resolved');
     equal(timer3.state(), 'resolved');
