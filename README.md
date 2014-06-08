@@ -20,22 +20,25 @@ jQuery(function($) {
     // this callback called after 100ms.
   });
 
-  var queue = $.Queue();
-  // You can add the callback to the queue, and callbacks are called by added order.
-  queue.add(function() {
+
+  var sequence = $.Sequence();
+
+  // You can define steps, which are called added order.
+  sequence.add(function() {
     // first.
-    // When queue is empty, callback called immediatelly.
-    // The return value delays next callback call
+    // The return value delays next step call
     return $.get('/foo.json').done(function() { /* process.. */ });
   });
-  queue.add(function() {
+  sequence.add(function() {
     // second.
     return $.get('/bar.json').done(function() { /* process.. */ });
   });
-  queue.add(function() {
+  sequence.add(function() {
     // third.
     return $.get('/buz.json').done(function() { /* process.. */ });
   });
+
+  sequence.play();
 
 });
 </script>
