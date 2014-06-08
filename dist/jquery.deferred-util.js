@@ -1,4 +1,4 @@
-/*! Deferred Util - v0.1.1 - 2014-06-05
+/*! Deferred Util - v0.1.2 - 2014-06-08
 * https://github.com/kakusuke/jquery-deferred-util
 * Copyright (c) 2014 kakusuke; Licensed MIT */
 (function($) {
@@ -9,30 +9,54 @@
     return dfd;
   };
 
-  var Queue = (function() {
-    function Queue() {
-      if (!(this instanceof Queue)) {
-        return new Queue();
+  var Sequence = (function() {
+    function Sequence() {
+      if (!(this instanceof Sequence)) {
+        return new Sequence();
       }
-      this._queue = [];
+
+      var jobs = [];
+      var thread = [];
+      var dfd = $.Deferred();
+
+      function addJob(i) {
+        var job = jobs[i];
+        var jobDfd = $.Deferred();
+        $.when.apply($, thread).done(function() {
+          (job.call(this) || $.Deferred().resolve()).always(function() {
+            jobDfd.resolve();
+            thread.splice($.inArray(jobDfd, thread), 1);
+          });
+        });
+        thread.push(jobDfd);
+      }
+      $.extend(this, {
+        add: function(job) {
+          jobs.push(job);
+        },
+        play: function() {
+          dfd = $.Deferred();
+
+          for (var i = 0, len = jobs.length; i < len; i++) {
+            addJob(i);
+          }
+          
+          $.when.apply($, thread)
+            .done(dfd.resolve)
+            .fail(dfd.reject);
+        },
+        promise: function() {
+          return dfd.promise();
+        }
+      });
     }
 
-    $.extend(Queue.prototype, {
-      add: function(cb) {
-        var dfd = $.Deferred();
-        $.when.apply($, this._queue).done(function() {
-          (cb.call(this) || $.Deferred().resolve()).always(dfd.resolve);
-        });
-        this._queue.push(dfd);
-      }
-    });
-
-    return Queue;
+    return Sequence;
   }());
 
   $.extend({
     wait: wait,
-    Queue: Queue
+    Sequence: Sequence
   });
 
 }(jQuery));
