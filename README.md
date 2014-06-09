@@ -1,5 +1,7 @@
 # Deferred Util
 
+[![Build Status](https://travis-ci.org/kakusuke/jquery-deferred-util.svg?branch=master)](https://travis-ci.org/kakusuke/jquery-deferred-util)
+
 Deferred Utility
 
 ## Getting Started
